@@ -1,9 +1,7 @@
-import medspacy
 from medspacy.section_detection import SectionRule
 
+from models import nlp_model
 from utils import collapse_and_strip_whitespace
-
-sectionizer_nlp = medspacy.load(medspacy_enable=["medspacy_sectionizer"], load_rules=False)
 
 section_rules = [
     # Chief Complaint
@@ -67,11 +65,11 @@ section_rules = [
     SectionRule(literal="Instructions", category="instructions"),
 ]
 
-sectionizer_nlp.get_pipe("medspacy_sectionizer").add(section_rules)
+nlp_model.get_pipe("medspacy_sectionizer").add(section_rules)
 
 # Parses raw clinical notes into distinct SOAP sections and returns them as a dictionary
 def sectionize_soap_note(text):
-    doc = sectionizer_nlp(text)
+    doc = nlp_model(text)
 
     """
     medspaCy uses section rules (e.g., "Plan") to sectionize the document. However, these keywords 

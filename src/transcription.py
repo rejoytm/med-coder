@@ -1,6 +1,6 @@
 import whisperx
 
-transcription_model = whisperx.load_model("large-v2", device="cpu", compute_type="int8")
+from models import transcription_model
 
 def transcribe(audio_path):
     audio = whisperx.load_audio(audio_path)
