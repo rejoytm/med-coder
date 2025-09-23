@@ -67,7 +67,7 @@ section_rules = [
 
 nlp_model.get_pipe("medspacy_sectionizer").add(section_rules)
 
-# Parses raw clinical notes into distinct SOAP sections and returns them as a dictionary
+# Parses raw clinical notes into distinct SOAP sections and returns a list of dictionaries with 'category' and 'text'
 def sectionize_soap_note(text):
     doc = nlp_model(text)
 
@@ -81,17 +81,21 @@ def sectionize_soap_note(text):
     TODO: Implement a more reliable method for detecting incorrect section splits.
     """    
 
-    soap_sections = {}
-    prev_section_category = None
+    sections = []
+    seen_categories = set()
 
     for section in doc._.sections:
+        category = section.category
         body = collapse_and_strip_whitespace(str(doc[section.body_span[0]:section.body_span[1]]))
         
-        if section.category in soap_sections: # Keyword wrongly detected as section start
+        if category in seen_categories: # Keyword wrongly detected as section start; append text to previous section
             keyword = collapse_and_strip_whitespace(str(doc[section.title_span[0]:section.title_span[1]]))
-            soap_sections[prev_section_category] += f" {keyword} {body}"
+            sections[-1]["text"] += f" {keyword} {body}"
         else: # First occurence of this section category
-            soap_sections[section.category] = body
-            prev_section_category = section.category
+            sections.append({
+                "category": category,
+                "text": body
+            })
+            seen_categories.add(category)
 
-    return soap_sections
+    return sections
