@@ -69,7 +69,8 @@ nlp_model.get_pipe("medspacy_sectionizer").add(section_rules)
 
 # Parses raw clinical notes into distinct SOAP sections and returns a list of dictionaries with 'category' and 'text'
 def sectionize_soap_note(text):
-    doc = nlp_model(text)
+    preprocessed_text = collapse_and_strip_whitespace(text)
+    doc = nlp_model(preprocessed_text)
 
     """
     medspaCy uses section rules (e.g., "Plan") to sectionize the document. However, these keywords 
@@ -86,10 +87,10 @@ def sectionize_soap_note(text):
 
     for section in doc._.sections:
         category = section.category
-        body = collapse_and_strip_whitespace(str(doc[section.body_span[0]:section.body_span[1]]))
+        body = str(doc[section.body_span[0]:section.body_span[1]])
         
         if category in seen_categories: # Keyword wrongly detected as section start; append text to previous section
-            keyword = collapse_and_strip_whitespace(str(doc[section.title_span[0]:section.title_span[1]]))
+            keyword = str(doc[section.title_span[0]:section.title_span[1]])
             sections[-1]["text"] += f" {keyword} {body}"
         else: # First occurence of this section category
             sections.append({
