@@ -2,4 +2,6 @@ whisperx
 spacy
 medspacy
 scikit-learn
+flask
+werkzeug
 pytest
